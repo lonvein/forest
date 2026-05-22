@@ -19,14 +19,14 @@ class Forest
         static void clear_instance();
 
         void listen();
+        int grow();
+        int less();
         void draw();
         void live();
         bool check(int x, int y);
         bool checkAnimals(int x, int y);
         bool checkPlants(int x, int y);
         void move();
-	int grow();
-	int less();
     private:
         Forest(); // Nobody can just take a forest and grow it on a backyard.
         static Forest* instance; // The forest - the one and the only.

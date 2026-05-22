@@ -76,6 +76,7 @@ Forest::~Forest()
         delete plants[i];
     delete[] animals;
     delete[] plants;
+    plants = nullptr;
     delete window;
 }
 
@@ -140,6 +141,14 @@ int Forest::init(int na, int np, int _X, int _Y)
         }
     }
     n_plants = np;
+    if (plants != nullptr) {
+        for (int i = 0; i < n_plants; i++) {
+            delete plants[i];
+        }
+        delete[] plants;
+        plants = nullptr;
+
+    }
     plants = new Plant*[n_plants];
     if (!plants) return 4;
     for (int i=0; i<n_plants; i++)
@@ -227,22 +236,17 @@ int Forest::init(int na, int np, int _X, int _Y)
 
 int Forest::grow()
 {
-    Plant** old_plants = plants;
-    int old_n = n_plants;
-
-    n_plants++;
-    plants = new Plant*[n_plants]();
-    if (!plants) return 4;
-
-
-    if (old_plants != nullptr) {
-        for (int i = 0; i < old_n; i++) {
-            delete old_plants[i]; // Удаляем каждое растение
+    if (plants != nullptr) {
+        for (int i = 0; i < n_plants; i++) {
+            delete plants[i];
         }
-        delete[] old_plants;     // Удаляем сам старый массив
+        delete[] plants;
+        plants = nullptr;
+
     }
-
-
+    n_plants++;
+    plants = new Plant*[n_plants];
+    if (!plants) return 4;
     for (int i=0; i<n_plants; i++)
     {
         int r = rand()%3;           // The amount of plants is also given from beyond, and each plant can also decide
@@ -272,7 +276,6 @@ int Forest::grow()
             break;
 
         }
-    return 0;
     }
 int ia = 0, ip = 0, _x, _y;
 
@@ -318,31 +321,18 @@ int ia = 0, ip = 0, _x, _y;
 
 int Forest::less()
 {
-
-    if (n_plants <= 0) return 0;
-
-    Plant** old_plants = plants;
-    int old_n = n_plants;
-
-
-    n_plants--;
-
-    if (n_plants > 0) {
-        plants = new Plant*[n_plants]();
-        if (!plants) return 4;
-    } else {
-        plants = nullptr;
-    }
-
-
-    if (old_plants != nullptr) {
-        for (int i = 0; i < old_n; i++) {
-            delete old_plants[i]; // Вызов деструктора конкретного растения
+    if (plants != nullptr) {
+        for (int i = 0; i < n_plants; i++) {
+            delete plants[i];
         }
-        delete[] old_plants;     // Освобождение массива
+        delete[] plants;
+        plants = nullptr;
+
     }
-
-
+    n_plants--;
+    n_plants = n_plants > 0 ? n_plants : 0;
+    plants = new Plant*[n_plants];
+    if (!plants) return 4;
     for (int i=0; i<n_plants; i++)
     {
         int r = rand()%3;           // The amount of plants is also given from beyond, and each plant can also decide
@@ -478,27 +468,21 @@ void Forest::draw()
 {
     if (!window || !animals || !plants) return;
 
+        // Plants and animals are really trusting to let everyone meddle with their faces.
+        // But this is most convenient for the forest.
+
     for (int i = 0; i < n_plants; i++)
     {
-        // ПРАВИЛЬНАЯ ЗАЩИТА: проверяем само растение
-        if (plants[i] == nullptr) continue; 
-
         sf::Sprite *s = plants[i]->getSprite();
         if (!s) continue;
-
         s->setPosition(sf::Vector2f(plants[i]->get_x() * SX / (float)X, plants[i]->get_y() * SY / (float)Y));
         s->setScale(sf::Vector2f(SX / 200.0 / X, SY / 200.0 / Y));
         window->draw(*s);
     }
-
     for (int i = 0; i < n_animals; i++)
     {
-        // ПРАВИЛЬНАЯ ЗАЩИТА: проверяем животное
-        if (animals[i] == nullptr) continue;
-
         sf::Sprite *s = animals[i]->getSprite();
         if (!s) continue;
-
         s->setPosition(sf::Vector2f(animals[i]->get_x() * SX/(float)X, animals[i]->get_y() * SY / (float)Y));
         s->setScale(sf::Vector2f(SX / 200.0 / X, SY / 200.0 / Y));
         window->draw(*s);
